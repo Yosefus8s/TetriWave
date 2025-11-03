@@ -1,131 +1,245 @@
-*{ /* vai aplicar esse estilo a todos os elementos da página */
-margin: 0px;/* margem externa ao elemento HTML, atua nas 4 margens */ 
-padding: 0px;/* margem interna ao elemento HMTL, atua nas 4 margens */ 
-  
-} 
-html{ 
-  font-size: 16px; /* Define 1rem = 16px para consistência em todo o projeto */
-  
-} 
-body{ 
-  background: #7378c6; /* define a cor de fundo do elemento HTML */ 
-  height: 100vh;/* ocupa altura total da tela*/ 
-  display: flex; /* ativa o flexbox e permite que os elementos internos sejam movidos */ 
-  flex-direction: column; /* organiza em colunas */ 
-  align-items: center; /* centraliza horizontalmente */ 
-  justify-content: center; /* centralizar verticalmente */ 
-  
-  
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+  /* vai aplicar esse estilo a todos os elementos da página */
+  margin: 0px;
+  /* margem externa ao elemento HTML, atua nas 4 margens */
+  padding: 0px;
+  /* margem interna ao elemento HMTL, atua nas 4 margens */
+
+}
+
+html {
+  font-size: 16px;
+  /* Define 1rem = 16px para consistência em todo o projeto */
+
+}
+
+body {
+  background: #7378c6;
+  /* define a cor de fundo do elemento HTML */
+  height: 100vh;
+  /* ocupa altura total da tela*/
+  display: flex;
+  /* ativa o flexbox e permite que os elementos internos sejam movidos */
+  flex-direction: column;
+  /* organiza em colunas */
+  align-items: center;
+  /* centraliza horizontalmente */
+  justify-content: center;
+  /* centralizar verticalmente */
+  font-family: 'Press Start 2P', cursive;
+
+}
+
+.text-style{
+    font-size: 1.2rem;
+    color: #FFD700; /* Cor de ouro */
+    text-shadow: 2px 2px 4px #000;  
 }
 /* Container principal: centraliza tudo */
 .container {
-  display: flex; /* permite movimentos dos elemenos*/
-  flex-direction: column;   /* organiza em colunas lado a lado */
-  justify-content: center; /* centraliza horizontalmente */
-  align-items: center;    /* centraliza verticalmente */
-  height: 100vh;/* ocupa altura total da tela*/ 
-  width: 100vw;/* ocupa largura total da tela*/ 
-  background-image: url('https://uploads.onecompiler.io/43rztqetx/43u38nauk/papel%20parede.png');
-  background-size: cover;/* cobre todo o container mantendo a proporção */
-  background-repeat: no-repeat;/* evita repetir a imagem */
-  background-position: center;/* Centraliza a imagem */
-  background-attachment: fixed;/* Fundo fixo durante scroll do mouse */
-  gap: 40px; /* espaçamento entre colunas */
+  display: flex;
+  /* permite movimentos dos elemenos*/
+  flex-direction: row;
+  /* organiza em colunas lado a lado */
+  justify-content: center;
+  /* centraliza horizontalmente */
+  align-items: center;
+  /* centraliza verticalmente */
+  height: 100vh;
+  /* ocupa altura total da tela*/
+  width: 100vw;
+  /* ocupa largura total da tela*/
+  background-image: url('img/background.png');
+  background-size: cover;
+  /* cobre todo o container mantendo a proporção */
+  background-repeat: no-repeat;
+  /* evita repetir a imagem */
+  background-position: center;
+  /* Centraliza a imagem */
+  background-attachment: fixed;
+  /* Fundo fixo durante scroll do mouse */
+  gap: 40px;
+  /* espaçamento entre colunas */
 }
 
 /* Coluna 1 (placar) */
 .coluna1 {
-  display: flex;/* permite movimentos dos elemenos*/
-  flex-direction: column;/* organiza em colunas lado a lado */
-  align-items: center;/* centraliza verticalmente */
-  justify-content: center;/* centraliza horizontalmente */
-  min-width: 200px;/* largura minima */ 
+  display: flex;
+  /* permite movimentos dos elemenos*/
+  flex-direction: column;
+  /* organiza em colunas lado a lado */
+  align-items: flex-start;
+  /* centraliza verticalmente */
+  justify-content: center;
+  /* centraliza horizontalmente */
+  min-width: 200px;
+  /* largura minima */
 }
 
 /* Coluna 2 (jogo central) */
 .coluna2 {
-  display: flex;/* permite movimentos dos elemenos*/
-  justify-content: center;/* centraliza horizontalmente */
-  align-items: center;/* centraliza verticalmente */
-  flex: 0 1 auto;  /* Não cresce, pode encolher, tamanho automático */
+  display: flex;
+  /* permite movimentos dos elemenos*/
+  justify-content: center;
+  /* centraliza horizontalmente */
+  align-items: center;
+  /* centraliza verticalmente */
+  flex: 0 1 auto;
+  /* Não cresce, pode encolher, tamanho automático */
 
 }
 
 .coluna2 canvas {
-  width: 300px;/* Largura fixa do canvas */
-  height: 600px;/* Altura fixa do canvas (proporção 1:2) */
-  background: rgba(0, 0, 0, 0.1);/* Fundo preto semi-transparente (10% opacidade) */
-  border: 2px solid #fff;/* Borda branca de 2px */
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);/* Sombra preta com 50% opacidade */
+  width: 300px;
+  /* Largura fixa do canvas */
+  height: 600px;
+  /* Altura fixa do canvas (proporção 1:2) */
+  background: rgba(0, 0, 0, 0.1);
+  /* Fundo preto semi-transparente (10% opacidade) */
+  border: 2px solid #fff;
+  /* Borda branca de 2px */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  /* Sombra preta com 50% opacidade */
 }
 
 /* Coluna 3 (next + terminal) */
 .coluna3 {
-  display: flex;/* permite movimentos dos elemenos*/
+  display: flex;
+  /* permite movimentos dos elemenos*/
   flex-direction: column;
-  align-items: center;/* centraliza verticalmente */
-  justify-content: flex-start; /* Alinha itens no topo */
-  min-width: 220px;/* Largura mínima */
-  gap: 10px; /* Espaçamento de 10px entre os itens */
+  align-items: center;
+  /* centraliza verticalmente */
+  justify-content: flex-start;
+  /* Alinha itens no topo */
+  min-width: 220px;
+  /* Largura mínima */
+  gap: 10px;
+  /* Espaçamento de 10px entre os itens */
 }
 
 .coluna3 canvas {
-  max-width: 150px;/* Largura máxima */
-  max-height: 150px;/* Altura máxima */
-  background: rgba(0,0,0,0.6);/* Fundo preto semi-transparente (60% opacidade) */
-  color: #fff; /* Texto branco */
-  border: 1px solid rgba(255,255,255,0.3); /* Borda branca semi-transparente */
-  padding: 10px;  /* Espaçamento interno */
-  border-radius: 8px; /* Cantos arredondados */
-  font-size: 0.9rem;/* Tamanho de fonte reduzido */
-  overflow-y: auto; /* Rolagem vertical se necessário */
+  max-width: 150px;
+  /* Largura máxima */
+  max-height: 150px;
+  /* Altura máxima */
+  background: rgba(0, 0, 0, 0.3);
+  /* Fundo preto semi-transparente (60% opacidade) */
+  color: #fff;
+  /* Texto branco */
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  /* Borda branca semi-transparente */
+  padding: 10px;
+  /* Espaçamento interno */
+  border-radius: 8px;
+  /* Cantos arredondados */
+  font-size: 0.9rem;
+  /* Tamanho de fonte reduzido */
+  overflow-y: auto;
+  /* Rolagem vertical se necessário */
 }
+
 .info-box {
-  display: flex;/* permite movimentos dos elemenos*/
-  flex-direction: column;/* Organiza itens verticalmente */
-  align-items: center;/* centraliza verticalmente */
-  margin: 10px 0;
-        }
+  display: flex;
+  /* permite movimentos dos elemenos*/
+  flex-direction: column;
+  /* Organiza itens verticalmente */
+  align-items: center;
+  /* centraliza verticalmente */
+  margin: 6px 0;
+  padding: 10px;
+  gap: 20px
+}
+
+.effect-box{
+  width: 150px;
+  /* largura fixa */
+  height: 30px;
+  /* altura fixa */
+  background: rgba(0, 0, 0, 0.3);
+  /* Fundo preto semi-transparente (60% opacidade) */
+  color: #fff;
+  /* Texto branco */
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  /* Borda branca semi-transparente */
+  padding: 10px;
+  /* Espaçamento interno */
+  border-radius: 8px;
+  /* Cantos arredondados */
+  font-size: 0.9rem;
+  /* Tamanho de fonte reduzido */
+  overflow-y: auto;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Caixa Terminal */
 .caixa-texto {
-  width: 250px;     /* largura fixa */
-  height: 150px;    /* altura fixa */
-  background: rgba(0,0,0,0.6);/* Fundo preto semi-transparente (60% opacidade) */
-  color: #fff;/* Texto branco */
-  border: 1px solid rgba(255,255,255,0.3);/* Borda branca semi-transparente */
-  padding: 10px;  /* Espaçamento interno */
-  border-radius: 8px; /* Cantos arredondados */
-  font-size: 0.9rem;/* Tamanho de fonte reduzido */
-  overflow-y: auto; /* rolagem caso o texto passe do tamanho fixo */
+  width: 250px;
+  /* largura fixa */
+  height: 150px;
+  /* altura fixa */
+  background: rgba(0, 0, 0, 0.3);
+  /* Fundo preto semi-transparente (60% opacidade) */
+  color: #fff;
+  /* Texto branco */
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  /* Borda branca semi-transparente */
+  padding: 10px;
+  /* Espaçamento interno */
+  border-radius: 8px;
+  /* Cantos arredondados */
+  font-size: 0.9rem;
+  /* Tamanho de fonte reduzido */
+  overflow-y: auto;
+  /* rolagem caso o texto passe do tamanho fixo */
 }
 
 .controles {
-  margin-top: 20px; /* Margem superior de 20px */
-  text-align: center; /* Texto centralizado */
-  color: #333; /* Cor do texto cinza escuro */
+  margin-top: 20px;
+  /* Margem superior de 20px */
+  text-align: center;
+  /* Texto centralizado */
+  color: #333;
+  /* Cor do texto cinza escuro */
 }
 
 .controles p {
-  margin: 5px 0;/* Margem vertical de 5px */
-  font-size: 0.9rem;/* Tamanho de fonte reduzido */
-}
-input {
-  padding: 5px; /* Espaçamento interno de 5px */
-  border: 1px solid #ccc; /* Borda cinza clara */
-  border-radius: 5px;/* Cantos levemente arredondados */
-  width: 130px;  /* Largura fixa */
-  margin-top: 10px;/* Margem superior de 10px */
-        }
-.so-imagem { 
-  display: block; /* Exibe como bloco (remove espaço inferior) */
-  width: 10vh; /* ou o tamanho que quiser */ 
-  
-  
-  
-}
-.imagem-grande{ 
-  display: block;/* Exibe como bloco */
-  width: 15vh;/* Largura relativa à altura da viewport */
-  
+  margin: 5px 0;
+  /* Margem vertical de 5px */
+  font-size: 0.9rem;
+  /* Tamanho de fonte reduzido */
 }
 
+input {
+  padding: 5px;
+  /* Espaçamento interno de 5px */
+  border: 1px solid #ccc;
+  /* Borda cinza clara */
+  border-radius: 5px;
+  /* Cantos levemente arredondados */
+  width: 130px;
+  /* Largura fixa */
+  margin-top: 10px;
+  /* Margem superior de 10px */
+}
+
+.so-imagem {
+  display: block;
+  /* Exibe como bloco (remove espaço inferior) */
+  width: 10vh;
+  /* ou o tamanho que quiser */
+
+
+
+}
+
+.imagem-grande {
+  display: block;
+  /* Exibe como bloco */
+  width: 15vh;
+  /* Largura relativa à altura da viewport */
+
+}
