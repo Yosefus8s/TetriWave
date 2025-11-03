@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TetriWave</title> <!-- Título da aba do navegador -->
+    <link rel="stylesheet" href="styles.css" /><!-- referencia o arquivo .css-->
+    <script defer src="script.js"></script> <!-- referencia o arquivo .js-->
+  </head>
+  
+  <body>
+      <h1 id="t">TetriWave </h1>  <!-- Título principal da página-->
+      <div class="container"> <!-- Div principal que contém todo o layout -->
+        <div class="coluna1"><!-- Primeira coluna da página-->
+          <div class="info-box"><!-- Caixa de informações para exibir o nível -->
+                <img src="https://uploads.onecompiler.io/43rztqetx/43u38nauk/levelc.png" alt="nível" class="so-imagem"><!-- Imagem representando "nível" -->
+                <p id="level">0</p><!-- nível atual -->
+            </div>
+            <div class="info-box"><!-- Caixa de informações para exibir as linhas -->
+                <img src="https://uploads.onecompiler.io/43rztqetx/43u38nauk/lines.png" alt="linhas" class="so-imagem"><!-- Imagem representando "linhas" -->
+                <p id="lines">0</p> <!-- número de linhas atuais -->
+            </div>
+            <div class="info-box"><!-- Caixa de informações para exibir o score -->
+                <img src="https://uploads.onecompiler.io/43rztqetx/43u38nauk/score.png" alt="pontuação" class="so-imagem"><!-- Imagem representando "pontuação" -->
+                <p id="score" class="score">000000</p><!-- mostra a pontuação -->
+            </div>
+            
+          <div class="controles"><!-- Lista de instruções de controle para o jogador -->
+                <p>← → : Mover</p>
+                <p>↑ : Girar</p>
+                <p>↓ : Descer</p>
+                <p>Espaço: Cair</p>
+                <p>P: Pausar</p>
+            </div>
+            
+            <button onclick="togglePause()">Pausar/Continuar</button> <!-- Botão que pausa/continua o jogo -->
+            <button onclick="reiniciarJogo()">Reiniciar</button><!-- Botão que reinicia o jogo -->
+        </div>
+        </div>
+        <div class="coluna2"><!-- Segunda coluna (área principal do jogo) -->
+          <canvas id="gameCanvas" width="300" height="600"></canvas><!-- onde o jogo será desenhado, com 300px de largura e 600px de altura -->
+      </div>
+        </div>
+        <div class="coluna3"><!-- Terceira coluna (próxima peça e saída do "terminal") -->
+          <img src ="https://uploads.onecompiler.io/43rztqetx/43u38nauk/nextc.png" alt="ícone2" class="so-imagem"><!-- Imagem que indica a área da próxima peça -->
+          <canvas id="mcan" width="150" height="150" ></canvas><!-- Canvas menor onde será exibida a próxima peça -->
+          <img src ="https://uploads.onecompiler.io/43rztqetx/43u38nauk/terminalc.png" alt="ícone2" class="imagem-grande"><!-- Imagem representando o terminal -->
+          <p id="out1" class="caixa-texto"></p><!-- Parágrafo usado como caixa de texto, onde mensagens aparecerão as mensagens -->
+      </div>
+    </body>
+</html>
