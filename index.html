@@ -54,20 +54,47 @@
       <!-- Parágrafo usado como caixa de texto, onde mensagens aparecerão as mensagens -->
     </div>
   </div>
-  <div id="popup" class="popup">
+
+  <audio id="bgMusic" src="audio/theme.mp3" loop preload="auto"></audio>
+  <audio id="sndLine" src="audio/line.mp3" preload="auto"></audio>
+  <audio id="sndLock" src="audio/lock.mp3" preload="auto"></audio>
+  <audio id="sndMove" src="audio/move.mp3" preload="auto"></audio>
+  <audio id="sndRotate" src="audio/rotate.mp3" preload="auto"></audio>
+  <audio id="sndDrop" src="audio/drop.mp3" preload="auto"></audio>
+  
+  <!-- Tela de Configurações -->
+<div id="configPopup" class="popup">
   <div class="popup-content">
-    <h2>Bem-vindo ao TetriWave!</h2>
-    <p>Controles:</p>
-    <ul>
-      <li>← → : mover</li>
-      <li>↑ : girar</li>
-      <li>↓ : descer</li>
-      <li>Espaço: cair</li>
-      <li>P: pausar</li>
-    </ul>
-    <button id="startButton">Iniciar Jogo</button>
+    <h2>Configurações de Som</h2>
+
+    <label for="volumeRange">Volume:</label>
+    <input type="range" id="volumeRange" min="0" max="1" step="0.05" value="0.5">
+
+    <div style="margin-top: 15px;">
+      <button id="muteButton">🔇 Som Desligado</button>
+      <button id="closeConfig">Fechar</button>
+    </div>
   </div>
 </div>
+
+<!-- Botão para abrir Configurações -->
+<button id="configButton" class="config-btn">
+  <img src="img/settings-gear.png" alt="Configurações" class="icon-btn"> 
+</button>
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <h2>Bem-vindo ao TetriWave!</h2>
+      <p>Controles:</p>
+      <ul>
+        <li>← → : mover</li>
+        <li>↑ : girar</li>
+        <li>↓ : descer</li>
+        <li>Espaço: cair</li>
+        <li>P: pausar</li>
+      </ul>
+      <button id="startButton">Iniciar Jogo</button>
+    </div>
+  </div>
 </body>
 
 </html>

@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     [[0, 1, 0], [1, 0, 0], [1, 1, 0]]
     ];
 
+    const BlocoLinhaCompleta = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]; // 10 colunas
+
 
     // Variáveis de estado do jogo
     let tabuleiro = Array.from({ length: ROWS }, () => Array(COLS).fill(0)); // Cria uma matriz
@@ -34,23 +36,66 @@ document.addEventListener("DOMContentLoaded", () => {
     let proximaPeca = null;
     let ultimoTempo = 0;
     let velocidade = 1000; // tempo em ms
+    let jogoIniciado = false;
+    const bgMusic = document.getElementById("bgMusic");
+    const sndLine = document.getElementById("sndLine");
+    const sndLock = document.getElementById("sndLock");
+    const sndMove = document.getElementById("sndMove");
+    const sndRotate = document.getElementById("sndRotate");
+    const sndDrop = document.getElementById("sndDrop");
+
+    bgMusic.volume = 0.3;
+    sndLine.volume = 0.5;
+    sndLock.volume = 0.5;
+    sndMove.volume = 0.4;
+    sndRotate.volume = 0.4;
+    sndDrop.volume = 0.5;
+
+    let musicaAtiva = false;
+
 
     // Inicialização do jogo
     function inicializar() {
+        if (jogoIniciado) return; // evita múltiplas inits
+        if (!musicaAtiva) {
+            bgMusic.play().catch(() => {
+                adicionarMensagem("Clique na tela para ativar o som (bloqueio do navegador)");
+            });
+            musicaAtiva = true;
+        }
+        jogoIniciado = true;
         proximaPeca = gerarPeca(); //gerador de peça aleatória
         novaPeca(); // coloca  uma nova peça no tabuleiro, move a proximaPeca para ser a pecaAtual, também verifica se já é game over
         atualizarProximaPeca();// mostra a próxima peça, limpa o canvas  e desenha a nova peça no tabuleiro
-        gameLoop(0);// loop, reinicia a função
-        document.addEventListener('keydown', handleKeyPress);// configura os controles do teclado. Quando uma tecla for pressionada, ela é chamada aqui
+        ultimoTempo = performance.now();
+        requestAnimationFrame(gameLoop);
+        adicionarMensagem("Jogo iniciado");
     }
 
     // Gera uma peça aleatória
     function gerarPeca() {
-        const tipo = parseInt(Math.random() * 10);// gerador de números aleatórios, gera um número decimal aleatóro entre 0 e 1 e múltiplica o número pelo número de peças, no fim converte o número para inteiro 
-        return {// retorna um objeto com três propriedades
-            forma: Blocos[tipo], // seleciona o formato do bloco baseado no número aleatório (tipo)
-            x: parseInt(COLS / 2) - parseInt(Blocos[tipo][0].length / 2), // centraliza o bloco horizontalmentecalcula o centro do tabuleiro, dividindo a coluna em 2. Também calcula a metade da largura do bloco e converte para inteiro
-            y: 0 // define a posição vertical do bloco, 0 ele vai começar no topo do tabuleiro
+        // Verifica se o modo debug está ativado
+        if (debugMode) {
+            const BlocoLinhaCompleta = [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] // ocupa todas as 10 colunas
+            ];
+
+            return {
+                forma: BlocoLinhaCompleta,
+                x: 0, // começa no canto esquerdo
+                y: 0  // começa no topo
+            };
+        }
+
+        // Caso contrário, gera uma peça aleatória normal
+        const tipo = Math.floor(Math.random() * Blocos.length);
+
+
+        // Retorna o objeto da peça
+        return {
+            forma: Blocos[tipo],
+            x: Math.floor(COLS / 2) - Math.floor(Blocos[tipo][0].length / 2), // centraliza no meio do tabuleiro
+            y: 0 // começa no topo
         };
     }
 
@@ -76,6 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const tamanhoBloco = 20; // define o tamanho de cada bloco do desenho em pixels, nesse caso 20px
         const offsetX = (nextCanvas.width - forma[0].length * tamanhoBloco) / 2; //centraliza horizontalmente a peça no canvas do next
         const offsetY = (nextCanvas.height - forma.length * tamanhoBloco) / 2; // centraliza verticalmente a peça no next
+        nextCtx.fillStyle = "#0ff";
         //loop de desenho da peça
         for (let y = 0; y < forma.length; y++) { // repete em cada linha da matriz da peça
             for (let x = 0; x < forma[y].length; x++) { // repete por cada coluna da linha atual
@@ -133,6 +179,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 }
             }
+            if (debugMode) {
+                ctx.fillStyle = "rgba(255,255,0,0.15)";
+                ctx.fillRect(0, 0, canvas.width, 20);
+                ctx.fillStyle = "#000";
+                ctx.font = "10px 'Press Start 2P'";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("DEBUG MODE", canvas.width / 2, 10);
+            }
+        }
+        if (debugMode) {
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
         }
     }
 
@@ -174,25 +234,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Trava a peça no tabuleiro
     function travarPeca() {
-        for (let y = 0; y < pecaAtual.forma.length; y++) {// Percorre cada linha da matriz de formato da peça
-            for (let x = 0; x < pecaAtual.forma[y].length; x++) {// Percorre cada coluna da linha atual
-
-                if (pecaAtual.forma[y][x]) {// Verifica se esta posição contém um bloco
-                    // Calcula a posição real da peça no tabuleiro
-                    const novY = pecaAtual.y + y; // Linha no tabuleiro
-                    const novX = pecaAtual.x + x; // Coluna no tabuleiro
-
-
+        for (let y = 0; y < pecaAtual.forma.length; y++) {
+            for (let x = 0; x < pecaAtual.forma[y].length; x++) {
+                if (pecaAtual.forma[y][x]) {
+                    const novY = pecaAtual.y + y;
+                    const novX = pecaAtual.x + x;
                     if (novY >= 0 && novY < ROWS && novX >= 0 && novX < COLS) {
-                        tabuleiro[novY][novX] = 1; // Marca a posição como ocupada
-                    } else if (novY >= ROWS) {
-                        // Caso extremo: se parte da peça passar do fundo,
-                        // "cola" o bloco na última linha válida
+                        tabuleiro[novY][novX] = 1;
+                    } else if (novY >= ROWS && novX >= 0 && novX < COLS) {
                         tabuleiro[ROWS - 1][novX] = 1;
                     }
                 }
             }
         }
+        sndLock.currentTime = 0; // reinicia o som (permite tocar várias vezes seguidas)
+        sndLock.play();
     }
 
     // Verifica e remove linhas completas
@@ -209,6 +265,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         if (linhasRemovidas > 0) {// Se pelo menos uma linha foi removida
+            sndLine.currentTime = 0;
+            sndLine.play();
             const pontos = [0, 100, 300, 500, 800]; // Sistema de pontuação: mais pontos para mais linhas de uma vez 0, 1, 2, 3, 4 linhas
             pontuacao += pontos[linhasRemovidas] * (nivel + 1);// Calcula a pontuação: pontos[linhas] × (nível + 1)
 
@@ -255,6 +313,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (verificarColisao()) {// Se a rotação causar colisão, restaura a forma original
             pecaAtual.forma = formaAntigaBackup;
         }
+        sndRotate.currentTime = 0;
+        sndRotate.play();
     }
 
     // Move a peça para a esquerda
@@ -264,7 +324,12 @@ document.addEventListener("DOMContentLoaded", () => {
         pecaAtual.x--; // Move para esquerda
         if (verificarColisao()) {
             pecaAtual.x++; // Se colidir, desfaz o movimento
+        } else {
+            if (!sndMove.paused) sndMove.pause();
+            sndMove.currentTime = 0;
+            sndMove.play();
         }
+
     }
 
     function moverDireita() {
@@ -273,6 +338,10 @@ document.addEventListener("DOMContentLoaded", () => {
         pecaAtual.x++; // Move para direita
         if (verificarColisao()) {
             pecaAtual.x--; // Se colidir, desfaz o movimento
+        } else {
+            if (!sndMove.paused) sndMove.pause();
+            sndMove.currentTime = 0;
+            sndMove.play();
         }
     }
 
@@ -280,6 +349,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function cairPeca() {
         if (!pecaAtual) return; // Se não há peça, sai da função
 
+        sndDrop.currentTime = 0;
+        sndDrop.play();
         while (!verificarColisao()) {// Move a peça para baixo até detectar colisão, while é uma forma de loop quando não se sabe precisamente quantas interações, diferente do for que sim
             pecaAtual.y++;
         }
@@ -290,53 +361,79 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Manipula pressionamento de teclas
-    function handleKeyPress(event) {
-        if (gameOver) return; // Se jogo terminou, ignora teclas
-        event.preventDefault();
+    document.addEventListener('keydown', (ev) => {
+        // allow F2, arrows, space, enter, p, r
+        const key = ev.key;
+        // Não previnir todos os defaults; apenas prevenir para as teclas de jogo que causam scroll.
+        const keysToPrevent = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
+        if (keysToPrevent.includes(key)) ev.preventDefault();
 
-        // Switch para diferentes teclas
-        switch (event.key) { // caso as teclas abaixo sejam pressionadas o event.key aciona
-            case 'ArrowLeft':// Seta esquerda ou A
+        // Se ainda não iniciou, Enter inicia quando popup já foi fechado (handled separately)
+        if (!jogoIniciado) {
+            // F2 toggles debug even before start
+            if (key === 'F2') {
+                debugMode = !debugMode;
+                adicionarMensagem(`Modo Debug: ${debugMode ? "Ativado" : "Desativado"}`);
+            }
+            return;
+        }
+
+        if (gameOver) return;
+
+        switch (key) {
+            case 'ArrowLeft':
             case 'a':
             case 'A':
                 moverEsquerda();
                 break;
-            case 'ArrowRight':// Seta direita ou D
+            case 'ArrowRight':
             case 'd':
             case 'D':
                 moverDireita();
                 break;
-            case 'ArrowDown':// Seta baixo ou S
+            case 'ArrowDown':
             case 's':
             case 'S':
                 moverPecaParaBaixo();
                 break;
-            case 'ArrowUp':// Seta cima ou W
+            case 'ArrowUp':
             case 'w':
             case 'W':
                 rotacionarPeca();
                 break;
-            case ' ': // Espaço para cair tudo
+            case ' ':
                 cairPeca();
                 break;
-            case 'p':// Tecla P pausa
+            case 'p':
             case 'P':
                 togglePause();
                 break;
-            case 'r': // R reinicia o jogo
+            case 'r':
             case 'R':
                 reiniciarJogo();
                 break;
+            case 'm':
+            case 'M':
+                bgMusic.muted = !bgMusic.muted;
+                sndLine.muted = sndLock.muted = sndMove.muted = sndRotate.muted = sndDrop.muted = bgMusic.muted;
+                adicionarMensagem(bgMusic.muted ? "Som desativado" : "Som ativado");
+                break;
+
+            case 'F2':
+                debugMode = !debugMode;
+                adicionarMensagem(`Modo Debug: ${debugMode ? "Ativado" : "Desativado"}`);
+                break;
         }
-    }
+    });
 
     // Pausa/continua o jogo
     function togglePause() {
         jogoPausado = !jogoPausado; // Pausa ou despausa
+        adicionarMensagem(jogoPausado ? "Jogo pausado" : "Jogo continuado");
         if (jogoPausado) {
-            adicionarMensagem("Jogo pausado"); // Adciona mensagem no terminal
+            bgMusic.pause();
         } else {
-            adicionarMensagem("Jogo continuado");
+            bgMusic.play();
         }
     }
 
@@ -397,6 +494,49 @@ document.addEventListener("DOMContentLoaded", () => {
     startButton.addEventListener("click", () => {
         popup.style.display = "none"; // esconde o popup
         desenharMensagemInicial(); // mostra o texto no canvas
+        const onEnterToStart = (e) => {
+            if (e.key === "Enter") {
+                document.removeEventListener("keydown", onEnterToStart);
+                inicializar();
+            }
+        };
+        document.addEventListener("keydown", onEnterToStart);
+    });
+
+    // --- CONFIGURAÇÕES DE SOM ---
+    const configButton = document.getElementById("configButton");
+    const configPopup = document.getElementById("configPopup");
+    const closeConfig = document.getElementById("closeConfig");
+    const muteButton = document.getElementById("muteButton");
+    const volumeRange = document.getElementById("volumeRange");
+
+    // Abre a tela de configurações
+    configButton.addEventListener("click", () => {
+        jogoPausado = true;
+        configPopup.style.display = "flex";
+        adicionarMensagem("Configurações abertas");
+    });
+
+    // Fecha a tela de configurações
+    closeConfig.addEventListener("click", () => {
+        configPopup.style.display = "none";
+        jogoPausado = false;
+        adicionarMensagem("Configurações fechadas");
+    });
+
+    // Alternar mute
+    muteButton.addEventListener("click", () => {
+        const muted = !bgMusic.muted;
+        bgMusic.muted = sndLine.muted = sndLock.muted = sndMove.muted = sndRotate.muted = sndDrop.muted = muted;
+        muteButton.textContent = muted ? "🔊 Som Ligado" : "🔇 Som Desligado";
+        adicionarMensagem(muted ? "Som desativado" : "Som ativado");
+    });
+
+    // Ajustar volume global
+    volumeRange.addEventListener("input", (e) => {
+        const vol = parseFloat(e.target.value);
+        bgMusic.volume = vol * 0.3; // música um pouco mais baixa
+        sndLine.volume = sndLock.volume = sndMove.volume = sndRotate.volume = sndDrop.volume = vol;
     });
 
     // Mostra mensagem “Pressione Enter para iniciar” no canvas
@@ -413,10 +553,5 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillText("PARA INICIAR", canvas.width / 2, canvas.height / 2 + 20);
     }
 
-    // Captura o Enter para iniciar o jogo
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !gameOver && !pecaAtual) {
-            inicializar();
-        }
-    });
+    desenharMensagemInicial();
 });
