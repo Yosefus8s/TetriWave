@@ -32,16 +32,18 @@ body {
 
 }
 
-.text-style{
-    font-size: 1.2rem;
-    color: #FFD700; /* Cor de ouro */
-    text-shadow: 2px 2px 4px #000;  
+.text-style {
+  font-size: 1.2rem;
+  color: #FFD700;
+  /* Cor de ouro */
+  text-shadow: 2px 2px 4px #000;
 }
+
 /* Container principal: centraliza tudo */
 .container {
   display: flex;
   /* permite movimentos dos elemenos*/
-  flex-direction: row;
+  flex-wrap: wrap;
   /* organiza em colunas lado a lado */
   justify-content: center;
   /* centraliza horizontalmente */
@@ -49,7 +51,7 @@ body {
   /* centraliza verticalmente */
   height: 100vh;
   /* ocupa altura total da tela*/
-  width: 100vw;
+  width: 100%;
   /* ocupa largura total da tela*/
   background-image: url('img/background.png');
   background-size: cover;
@@ -62,6 +64,7 @@ body {
   /* Fundo fixo durante scroll do mouse */
   gap: 40px;
   /* espaçamento entre colunas */
+  padding: 20px
 }
 
 /* Coluna 1 (placar) */
@@ -70,11 +73,14 @@ body {
   /* permite movimentos dos elemenos*/
   flex-direction: column;
   /* organiza em colunas lado a lado */
-  align-items: flex-start;
+  align-items: center;
   /* centraliza verticalmente */
+  text-align: center;
   justify-content: center;
+  text-align: center;
   /* centraliza horizontalmente */
   min-width: 200px;
+  height: 100%;
   /* largura minima */
 }
 
@@ -92,10 +98,11 @@ body {
 }
 
 .coluna2 canvas {
-  width: 300px;
-  /* Largura fixa do canvas */
-  height: 600px;
-  /* Altura fixa do canvas (proporção 1:2) */
+  width: 100%;
+  aspect-ratio: 1 / 2;
+  /* mantém proporção 1:2 */
+  max-width: 300px;
+  /* não deixa o canvas ficar muito grande */
   background: rgba(0, 0, 0, 0.1);
   /* Fundo preto semi-transparente (10% opacidade) */
   border: 2px solid #fff;
@@ -149,13 +156,13 @@ body {
   /* centraliza verticalmente */
   margin: 6px 0;
   padding: 10px;
-  gap: 20px
+  gap: 20px;
 }
 
-.effect-box{
+.effect-box {
   width: 150px;
   /* largura fixa */
-  height: 30px;
+  height: 15px;
   /* altura fixa */
   background: rgba(0, 0, 0, 0.3);
   /* Fundo preto semi-transparente (60% opacidade) */
@@ -169,10 +176,10 @@ body {
   /* Cantos arredondados */
   font-size: 0.9rem;
   /* Tamanho de fonte reduzido */
-  overflow-y: auto;
-  text-align: center;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  overflow: hidden;
 }
 
 /* Caixa Terminal */
@@ -203,6 +210,7 @@ body {
   text-align: center;
   /* Texto centralizado */
   color: #333;
+  justify-items: auto;
   /* Cor do texto cinza escuro */
 }
 
@@ -226,20 +234,46 @@ input {
   /* Margem superior de 10px */
 }
 
-.so-imagem {
-  display: block;
-  /* Exibe como bloco (remove espaço inferior) */
-  width: 10vh;
-  /* ou o tamanho que quiser */
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 
+  .popup-content {
+    background: #222;
+    color: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #FFD700;
+    box-shadow: 0 0 20px rgba(255,215,0,0.4);
 
+    h2, p{
+      padding: 15px;
+    }
+    ul{
+      list-style: none;
+      padding: 0px;
+      margin: 20px 0;
+      line-height: 2;
+    }
+    #startButton {
+      background:#FFD700;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
 
-}
-
-.imagem-grande {
-  display: block;
-  /* Exibe como bloco */
-  width: 15vh;
-  /* Largura relativa à altura da viewport */
-
+      &::hover{
+        background: #ffea00;
+        transform: scale(1.05)
+      }
+    }
+  }
 }
