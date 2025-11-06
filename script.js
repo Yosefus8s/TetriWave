@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Definição das peças do jogo
     const Blocos = [[[1, 1, 1], [1, 0, 0], [1, 0, 0]],//0
     [[0, 1, 1], [1, 1, 0], [1, 0, 0]],//1
-    [[1, 1, 1], [1, 0, 1]],//2
+    [[1, 1, 1], [1, 0, 1], [0, 0, 0]],//2
     [[1, 0, 0], [1, 1, 1], [0, 0, 1]],//3
     [[0, 0, 1], [1, 1, 1], [1, 0, 0]],//4
     [[0, 1, 0], [1, 1, 0], [0, 1, 1]],//5
@@ -211,6 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
         clearInterval(insanoTimerInterval);
         clearTimeout(insanoTimeout);
     }
+    // Fim do Easter EGG Modo Insano
+
+
     if (pausePanelBtn) {
         pausePanelBtn.addEventListener('click', () => {
             // usa a mesma função de pausar/continuar já existente
@@ -235,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Verifica se o modo debug está ativado
         if (debugMode) {
             const BlocoLinhaCompleta = [
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] // ocupa todas as 10 colunas
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // ocupa todas as 10 colunas
             ];
 
             return {
@@ -382,35 +385,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function flutuarPeca() {
-        if (!pecaAtual) return;
+    function desenharPeca(peca) {
+        if (!peca) return;
     
-        adicionarMensagem("🛫 A peça começou a flutuar!");
-        let passos = 0;
-        const copia = JSON.parse(JSON.stringify(pecaAtual)); // cópia da peça
-    
-        const anim = setInterval(() => {
-            if (passos < 40) { // sobe por 2s
-                copia.y -= 0.2;
-                desenhar(); // redesenha o tabuleiro
-                desenharPecaTemp(copia); // desenha a cópia subindo
-                passos++;
-    
-                // se sair do topo do canvas
-                if (copia.y + copia.forma.length < 0) {
-                    clearInterval(anim);
-                    desaparecerPeca(copia);
-                }
-            } else {
-                clearInterval(anim);
-                desaparecerPeca(copia);
-            }
-        }, 50);
-    }
-    
-    // desenha uma peça temporária (usada no efeito)
-    function desenharPecaTemp(peca, cor = "rgba(255,255,255,1)") {
-        ctx.fillStyle = cor;
         for (let y = 0; y < peca.forma.length; y++) {
             for (let x = 0; x < peca.forma[y].length; x++) {
                 if (peca.forma[y][x]) {
@@ -425,24 +402,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    function desaparecerPeca(pecaBackup) {
-        let brilho = 0;
-        const fade = setInterval(() => {
-            brilho += 0.1;
-            desenhar();
-            desenharPecaTemp(pecaBackup, `rgba(255,255,255,${1 - brilho})`);
-            if (brilho >= 1) {
-                clearInterval(fade);
-                pecaAtual = null;
-                adicionarMensagem("💨 A peça sumiu no céu!");
-                novaPeca(); // gera uma nova peça automaticamente
+    // EASTER EGG (Eduardo Reis): Avião (pressionar ArrowUp por 2s) flutua a peça até o topo do canvas sem dar game over. ---
+
+    function flutuarPeca() {
+        if (!pecaAtual) return;
+    
+        adicionarMensagem("🛫 A peça começou a flutuar!");
+        const velocidadeSubida = 0.3; // velocidade da subida
+        const intervalo = 30;         // tempo entre frames (ms)
+    
+        const anim = setInterval(() => {
+            // verifica se há espaço acima
+            if (pecaAtual.y > 0) {
+                pecaAtual.y -= velocidadeSubida; // sobe
+                if (pecaAtual.y < 0) pecaAtual.y = 0; // trava no topo
+                desenhar();
+                desenharPeca(pecaAtual, "#0ff");
+            } else {
+                // chegou no topo — apenas para o voo, sem sumir
+                clearInterval(anim);
+                adicionarMensagem("☁️ A peça atingiu o topo e ficou flutuando.");
+                pararAviaoSom();
+    
+                // agora ela fica travada visualmente no topo,
+                // mas o jogo continua e o jogador pode continuar jogando
+                // (não chamamos novaPeca nem alteramos pecaAtual)
             }
-        }, 100);
-    }
-    
-    
-    
-    
+        }, intervalo);
+    }    
     function pararAviaoSom() {
         // para o som e limpa estado
         try { aviaoSom.pause(); aviaoSom.currentTime = 0; } catch (e) {}
@@ -453,7 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
         aviaoPhaseTimeouts = [];
         adicionarMensagem("🛬 Voo concluído!");
       }
-      
+      // Fim dessa parte do easter egg
 
     // Move a peça para baixo
     function moverPecaParaBaixo() {
@@ -470,26 +457,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Verifica se há colisão
     function verificarColisao() {
-        for (let y = 0; y < pecaAtual.forma.length; y++) { // Percorre cada linha da matriz de formato da peça atual
-            for (let x = 0; x < pecaAtual.forma[y].length; x++) {// Percorre cada coluna da linha atual da peça
-                if (pecaAtual.forma[y][x]) {// Verifica se esta posição contém um bloco (valor 1)
-                    const novX = pecaAtual.x + x; // Calcula a posição real no tabuleiro, posição X no tabuleiro
-                    const novY = pecaAtual.y + y;// Posição Y no tabuleiro
-
-                    // Verifica quatro condições de colisão:
-                    if (
-                        novX < 0 || // Colisão com parede esquerda
-                        novX >= COLS || // Colisão com parede direita
-                        novY >= ROWS || // Colisão com o fundo do tabuleiro
-                        (novY >= 0 && tabuleiro[novY][novX]) // Colisão com bloco existente (e dentro dos limites)
-                    ) {
-                        return true; // Retorna true se qualquer colisão for detectada
-                    }
+        if (!pecaAtual || !pecaAtual.forma) return false;
+    
+        for (let y = 0; y < pecaAtual.forma.length; y++) {
+            const linha = pecaAtual.forma[y];
+            if (!linha) continue; // segurança extra
+    
+            for (let x = 0; x < linha.length; x++) {
+                if (!linha[x]) continue; // ignora blocos vazios
+    
+                const novoX = pecaAtual.x + x;
+                const novoY = pecaAtual.y + y;
+    
+                // Se estiver fora dos limites do tabuleiro
+                if (novoX < 0 || novoX >= COLS || novoY >= ROWS) {
+                    return true;
+                }
+    
+                // Se a linha do tabuleiro ainda não existe, ignora
+                if (novoY >= 0 && tabuleiro[novoY] && tabuleiro[novoY][novoX]) {
+                    return true;
                 }
             }
         }
-        return false; // Retorna false se nenhuma colisão foi encontrada
+        return false;
     }
+    
 
     // Trava a peça no tabuleiro
     function travarPeca() {
@@ -547,35 +540,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Rotaciona a peça atual
     function rotacionarPeca() {
-        if (!pecaAtual) return; // proteção: evita erro se peça sumir (ex: aviã-som)
-        const formaAntiga = pecaAtual.forma;    // Guarda a forma original para possível restauração
-
-        // Obtém dimensões da peça atual
-        const N = formaAntiga.length;     // Número de linhas
-        const M = formaAntiga[0].length;  // Número de colunas
-
-
-        let novaForma = Array.from({ length: M }, () => Array.from({ length: N }, () => 0));// Cria uma nova matriz vazia para a rotação
-
-        // Preenche a nova matriz com os valores rotacionados a 90 graus
+        if (!pecaAtual || !pecaAtual.forma) return;
+    
+        // Garante que todas as linhas tenham o mesmo comprimento (completa com 0)
+        const larguraMax = Math.max(...pecaAtual.forma.map(l => l.length));
+        const formaNormalizada = pecaAtual.forma.map(linha => {
+            const novaLinha = linha.slice(); // copia
+            while (novaLinha.length < larguraMax) novaLinha.push(0);
+            return novaLinha;
+        });
+    
+        const N = formaNormalizada.length;
+        const M = formaNormalizada[0].length;
+    
+        // Cria nova matriz rotacionada
+        const novaForma = Array.from({ length: M }, () => Array(N).fill(0));
         for (let y = 0; y < N; y++) {
             for (let x = 0; x < M; x++) {
-
-                novaForma[x][N - 1 - y] = formaAntiga[y][x];// Fórmula de rotação 90 graus no sentido horário:
+                novaForma[x][N - 1 - y] = formaNormalizada[y][x];
             }
         }
-
-
-        const formaAntigaBackup = pecaAtual.forma; // Guarda backup e aplica a nova forma
+    
+        const formaAntiga = pecaAtual.forma;
         pecaAtual.forma = novaForma;
-
-
-        if (verificarColisao()) {// Se a rotação causar colisão, restaura a forma original
-            pecaAtual.forma = formaAntigaBackup;
+    
+        // Se colidir, restaura
+        if (verificarColisao()) {
+            pecaAtual.forma = formaAntiga;
+        } else {
+            try {
+                sndRotate.currentTime = 0;
+                sndRotate.play();
+            } catch (e) {}
         }
-        sndRotate.currentTime = 0;
-        sndRotate.play();
     }
+    
 
     // Move a peça para a esquerda
     function moverEsquerda() {
@@ -686,7 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // EASTER EGG (Eduardo Reis): Avião (pressionar ArrowUp por 2s) ativa a turbina em turnos de 2 segundos, e volta o bloco sumindo do mapa ---
+    // (Continuação) EASTER EGG (Eduardo Reis): Avião (pressionar ArrowUp por 2s) ativa a turbina em turnos de 2 segundos, e volta o bloco sumindo do mapa ---
     let aviaoAtivo = false;      // evita reentrância
     let aviaoPhaseTimeouts = []; // guarda timeouts pra limpar depois
 
@@ -740,7 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // se o som já estiver tocando, para
         if (aviaoAtivo) pararAviaoSom();
     }); 
-
+// Fim Easter EGG Avião
 
     // Pausa/continua o jogo
     function togglePause() {
