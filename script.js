@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const playerNameInput = document.getElementById("playerName");
     const saveRecordBtn = document.getElementById("saveRecord");
     const skipRecordBtn = document.getElementById("skipRecord");
-    const reiniciarButtonPainel = document.querySelector('.coluna1 button:nth-of-type(2)');
-    reiniciarButtonPainel.addEventListener('click', reiniciarJogo);
+    const pausePanelBtn = document.getElementById('pausePanelBtn');
+    const restartPanelBtn = document.getElementById('restartPanelBtn');
 
     const ROWS = 20; // linhas horizontal, vigas do jogo
     const COLS = 10; // colunas do jogo
@@ -34,9 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     [[0, 1, 0], [1, 0, 0], [1, 1, 0]]
     ];
 
-    const BlocoLinhaCompleta = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]; // 10 colunas
-
-
     // Variáveis de estado do jogo
     let tabuleiro = Array.from({ length: ROWS }, () => Array(COLS).fill(0)); // Cria uma matriz
     let pontuacao = 0;
@@ -52,13 +49,23 @@ document.addEventListener("DOMContentLoaded", () => {
     let jogoIniciado = false;
     let tempoInicio = null;
     let tempoJogado = 0;
-
+    // MODO INSANO
+    let modoInsano = false;
+    let insanoTimeout = null;
+    let cliquesInsano = 0;
+    let ultimoCliqueInsano = 0;
+    let insanoTimerInterval = null;
+    let tempoRestanteInsano = 0;
     const bgMusic = document.getElementById("bgMusic");
     const sndLine = document.getElementById("sndLine");
     const sndLock = document.getElementById("sndLock");
     const sndMove = document.getElementById("sndMove");
     const sndRotate = document.getElementById("sndRotate");
     const sndDrop = document.getElementById("sndDrop");
+    const aviaoSom = document.getElementById("aviaoSom");
+    let aviaoPressionado = false;
+    let aviaoTimeout = null;
+    let faseAviao = 0;
 
     bgMusic.volume = 0.3;
     sndLine.volume = 0.5;
@@ -115,7 +122,113 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(gameLoop);
         adicionarMensagem("Jogo iniciado");
     }
+    // Detecta 3 cliques rápidos do mouse para ativar o Modo Insano
+    document.addEventListener("click", () => {
+        const agora = Date.now();
 
+        // Se o clique for dentro de 500ms do anterior
+        if (agora - ultimoCliqueInsano < 500) {
+            cliquesInsano++;
+        } else {
+            cliquesInsano = 1; // reinicia contagem se demorou demais
+        }
+
+        ultimoCliqueInsano = agora;
+
+        // Se clicou 3 vezes em menos de 1.5 segundos e o jogo ainda não começou
+        if (cliquesInsano >= 3 && !modoInsano && !jogoIniciado) {
+            ativarModoInsano();
+        }
+    });
+
+    // Easter EGG (José Otávio), quando o jogador clicar 3 vezes com o mouse na tela antes de começar o jogo, ativa o MODO INSANO, dura 60s.
+    function ativarModoInsano() {
+        console.log("🔥 MODO INSANO ATIVADO!");
+        modoInsano = true;
+        tempoRestanteInsano = 60;
+
+        // Guarda velocidade original
+        velocidadeOriginal = velocidade;
+        velocidade = Math.max(100, velocidadeOriginal / 3); // peças 3x mais rápidas
+
+        adicionarMensagem("🔥 MODO INSANO ATIVADO! Aguente firme por 60s!");
+
+        // Acelera a música
+        try {
+            bgMusic.playbackRate = 1.5;
+            bgMusic.play();
+        } catch (e) { }
+
+        // Efeito visual
+        document.body.classList.add("modo-insano");
+
+        // Mostra o contador na tela
+        const timerEl = document.getElementById("insanoTimer");
+        if (timerEl) {
+            timerEl.style.display = "block";
+            timerEl.textContent = `INSANO: ${tempoRestanteInsano}s`;
+        }
+
+        // Atualiza o contador a cada segundo
+        clearInterval(insanoTimerInterval);
+        insanoTimerInterval = setInterval(() => {
+            tempoRestanteInsano--;
+            if (timerEl) timerEl.textContent = `INSANO: ${tempoRestanteInsano}s`;
+
+            if (tempoRestanteInsano <= 0) {
+                desativarModoInsano();
+            }
+        }, 1000);
+
+        // Duração total: 60 segundos (segurança extra)
+        clearTimeout(insanoTimeout);
+        insanoTimeout = setTimeout(desativarModoInsano, 60000);
+    }
+
+    function desativarModoInsano() {
+        if (!modoInsano) return; // evita repetir se já saiu
+
+        console.log("😮‍💨 MODO INSANO DESATIVADO!");
+        modoInsano = false;
+        velocidade = velocidadeOriginal;
+        adicionarMensagem("😮‍💨 Ufa... Voltando ao normal!");
+
+        // Restaura a música
+        try {
+            if (bgMusic) {
+                bgMusic.playbackRate = 1.0;
+            }
+        } catch (e) { }
+
+        // Remove o efeito visual
+        document.body.classList.remove("modo-insano");
+
+        // Esconde o contador
+        const timerEl = document.getElementById("insanoTimer");
+        if (timerEl) timerEl.style.display = "none";
+
+        // Limpa timers
+        clearInterval(insanoTimerInterval);
+        clearTimeout(insanoTimeout);
+    }
+    if (pausePanelBtn) {
+        pausePanelBtn.addEventListener('click', () => {
+            // usa a mesma função de pausar/continuar já existente
+            togglePause();
+        });
+    } else {
+        console.warn('pausePanelBtn não encontrado no DOM');
+    }
+
+    if (restartPanelBtn) {
+        restartPanelBtn.addEventListener('click', () => {
+            // fecha qualquer popup e reinicia
+            try { pausePopup.style.display = 'none'; } catch (e) { }
+            reiniciarJogo();
+        });
+    } else {
+        console.warn('restartPanelBtn não encontrado no DOM');
+    }
 
     // Gera uma peça aleatória
     function gerarPeca() {
@@ -154,6 +267,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (verificarColisao()) { // instrução que retorna true se a peça atual colidir com algo, ela é acionada quando a peça nasce em cia de outro bloco ou ela nasce fora dos limites do tabuleiro
             gameOver = true; // o jogo termina
             adicionarMensagem("Fim de jogo! Sua pontuação: " + pontuacao); // exibe uma mensagem que informa o fim do jogo
+            if (modoInsano) {
+                desativarModoInsano();
+            }
+            if (aviaoAtivo || aviaoPressionado) {
+                pararAviaoSom(); // garante que som e timeouts parem imediatamente
+            }            
             mostrarTelaRecord(); // ← chama a tela de record
 
         }
@@ -263,6 +382,79 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function flutuarPeca() {
+        if (!pecaAtual) return;
+    
+        adicionarMensagem("🛫 A peça começou a flutuar!");
+        let passos = 0;
+        const copia = JSON.parse(JSON.stringify(pecaAtual)); // cópia da peça
+    
+        const anim = setInterval(() => {
+            if (passos < 40) { // sobe por 2s
+                copia.y -= 0.2;
+                desenhar(); // redesenha o tabuleiro
+                desenharPecaTemp(copia); // desenha a cópia subindo
+                passos++;
+    
+                // se sair do topo do canvas
+                if (copia.y + copia.forma.length < 0) {
+                    clearInterval(anim);
+                    desaparecerPeca(copia);
+                }
+            } else {
+                clearInterval(anim);
+                desaparecerPeca(copia);
+            }
+        }, 50);
+    }
+    
+    // desenha uma peça temporária (usada no efeito)
+    function desenharPecaTemp(peca, cor = "rgba(255,255,255,1)") {
+        ctx.fillStyle = cor;
+        for (let y = 0; y < peca.forma.length; y++) {
+            for (let x = 0; x < peca.forma[y].length; x++) {
+                if (peca.forma[y][x]) {
+                    ctx.fillRect(
+                        (peca.x + x) * BLOCK_SIZE,
+                        (peca.y + y) * BLOCK_SIZE,
+                        BLOCK_SIZE - 1,
+                        BLOCK_SIZE - 1
+                    );
+                }
+            }
+        }
+    }
+    
+    function desaparecerPeca(pecaBackup) {
+        let brilho = 0;
+        const fade = setInterval(() => {
+            brilho += 0.1;
+            desenhar();
+            desenharPecaTemp(pecaBackup, `rgba(255,255,255,${1 - brilho})`);
+            if (brilho >= 1) {
+                clearInterval(fade);
+                pecaAtual = null;
+                adicionarMensagem("💨 A peça sumiu no céu!");
+                novaPeca(); // gera uma nova peça automaticamente
+            }
+        }, 100);
+    }
+    
+    
+    
+    
+    function pararAviaoSom() {
+        // para o som e limpa estado
+        try { aviaoSom.pause(); aviaoSom.currentTime = 0; } catch (e) {}
+        aviaoAtivo = false;
+        aviaoPressionado = false;
+        // limpa timeouts só por garantia
+        aviaoPhaseTimeouts.forEach(t => clearTimeout(t));
+        aviaoPhaseTimeouts = [];
+        adicionarMensagem("🛬 Voo concluído!");
+      }
+      
+
     // Move a peça para baixo
     function moverPecaParaBaixo() {
         if (!pecaAtual) return; // Verifica se existe uma peça atual em movimento, se não houver peça o pecaAtual é null e retorna sem fazer nada
@@ -355,6 +547,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Rotaciona a peça atual
     function rotacionarPeca() {
+        if (!pecaAtual) return; // proteção: evita erro se peça sumir (ex: aviã-som)
         const formaAntiga = pecaAtual.forma;    // Guarda a forma original para possível restauração
 
         // Obtém dimensões da peça atual
@@ -493,6 +686,62 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // EASTER EGG (Eduardo Reis): Avião (pressionar ArrowUp por 2s) ativa a turbina em turnos de 2 segundos, e volta o bloco sumindo do mapa ---
+    let aviaoAtivo = false;      // evita reentrância
+    let aviaoPhaseTimeouts = []; // guarda timeouts pra limpar depois
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowUp") return;
+        // só inicia se o jogo estiver rodando e não estivermos no game over e se ainda não estiver ativo
+        if (!jogoIniciado || gameOver || aviaoAtivo) return;
+        if (aviaoPressionado) return; // já contando
+
+        aviaoPressionado = true;
+
+        // fase 1: após 2s -> inicia som (fase inicial)
+        const t1 = setTimeout(() => {
+            if (!aviaoPressionado || aviaoAtivo) return;
+            aviaoAtivo = true;
+            // início do som
+            try { aviaoSom.currentTime = 0; aviaoSom.volume = 0.35; aviaoSom.play(); } catch (e) { }
+            adicionarMensagem("✈️ Avião: fase 1 (potência baixa)");
+        }, 2000);
+
+        // fase 2: 4s totais -> aumenta volume
+        const t2 = setTimeout(() => {
+            if (!aviaoPressionado || !aviaoAtivo) return;
+            try { aviaoSom.volume = 0.6; } catch (e) { }
+            adicionarMensagem("✈️ Avião: fase 2 (potência média)");
+        }, 4000);
+
+        // fase 3: 6s totais -> máxima potência + flutuar
+        const t3 = setTimeout(() => {
+            if (!aviaoPressionado || !aviaoAtivo) return;
+            try { aviaoSom.volume = 1.0; } catch (e) { }
+            adicionarMensagem("🔥 Avião: TURBO!");
+            // executa a animação da peça decolando
+            flutuarPeca(); // função segura (ver abaixo)
+            // encerra o avião automaticamente 2s depois
+            const tEnd = setTimeout(() => {
+                pararAviaoSom();
+            }, 2000);
+            aviaoPhaseTimeouts.push(tEnd);
+        }, 6000);
+
+        aviaoPhaseTimeouts.push(t1, t2, t3);
+    });
+
+    document.addEventListener("keyup", (e) => {
+        if (e.key !== "ArrowUp") return;
+        aviaoPressionado = false;
+        // limpa timeouts pendentes (se o jogador soltou antes de ativar)
+        aviaoPhaseTimeouts.forEach(t => clearTimeout(t));
+        aviaoPhaseTimeouts = [];
+        // se o som já estiver tocando, para
+        if (aviaoAtivo) pararAviaoSom();
+    }); 
+
+
     // Pausa/continua o jogo
     function togglePause() {
         jogoPausado = !jogoPausado;
@@ -601,6 +850,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function mostrarTelaRecord() {
         console.log("mostrarTelaRecord() chamada");
 
+        // Garante que há um recorde salvo ou cria um padrão
         let recordeAtual;
         try {
             recordeAtual = JSON.parse(localStorage.getItem("recorde"));
@@ -610,26 +860,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!recordeAtual || typeof recordeAtual.pontuacao !== "number") {
             recordeAtual = { nome: "Anônimo", pontuacao: 0 };
+            localStorage.setItem("recorde", JSON.stringify(recordeAtual));
         }
 
-        finalScoreEl.textContent = pontuacao;
+        console.log("Pontuação atual:", pontuacao, "| Recorde salvo:", recordeAtual.pontuacao);
 
+        // 🔹 CASO 1 — Novo recorde
         if (pontuacao > recordeAtual.pontuacao) {
+            console.log(">> Novo recorde detectado! <<");
+
+            finalScoreEl.textContent = pontuacao;
+            recordPopup.style.display = "flex"; // mostra tela de novo recorde
+            try { bgMusic.pause(); } catch (e) { }
+
             adicionarMensagem("🎉 Novo recorde!");
-        } else {
+        }
+
+        // 🔹 CASO 2 — Não bateu recorde → mostra tela de Fim de Jogo
+        else {
+            console.log("Pontuação menor, mostrando Fim de Jogo");
+            document.getElementById("finalScoreGameOver").textContent = pontuacao;
+            document.getElementById("gameOverPopup").style.display = "flex";
+            try { bgMusic.pause(); } catch (e) { }
+
             adicionarMensagem(
-                `Você fez ${pontuacao} pontos. Record atual: ${recordeAtual.pontuacao} (${recordeAtual.nome})`
+                `Você fez ${pontuacao} pontos. Recorde atual: ${recordeAtual.pontuacao} (${recordeAtual.nome})`
             );
         }
-
-        // 🔹 Sempre exibe o popup (com ou sem novo recorde)
-        recordPopup.style.display = "flex";
-
-        // 🔹 Pausa o som de fundo
-        try { bgMusic.pause(); } catch (e) { }
     }
-
-
 
     saveRecordBtn.addEventListener("click", () => {
         const nome = playerNameInput.value.trim() || "Anônimo";
@@ -643,6 +901,19 @@ document.addEventListener("DOMContentLoaded", () => {
     skipRecordBtn.addEventListener("click", () => {
         recordPopup.style.display = "none";
         adicionarMensagem("Recorde ignorado");
+    });
+
+    const restartGameOverBtn = document.getElementById("restartGameOver");
+    const exitGameOverBtn = document.getElementById("exitGameOver");
+
+    restartGameOverBtn.addEventListener("click", () => {
+        document.getElementById("gameOverPopup").style.display = "none";
+        reiniciarJogo();
+    });
+
+    exitGameOverBtn.addEventListener("click", () => {
+        document.getElementById("gameOverPopup").style.display = "none";
+        adicionarMensagem("Jogo encerrado.");
     });
 
     const restartAfterRecordBtn = document.getElementById("restartAfterRecord");
