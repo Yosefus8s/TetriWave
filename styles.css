@@ -6,13 +6,11 @@
   /* margem externa ao elemento HTML, atua nas 4 margens */
   padding: 0px;
   /* margem interna ao elemento HMTL, atua nas 4 margens */
-
 }
 
 html {
   font-size: 16px;
   /* Define 1rem = 16px para consistência em todo o projeto */
-
 }
 
 body {
@@ -475,4 +473,125 @@ input {
   transform: scale(1.1);
 }
 
+#gameOverPopup {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+
+#gameOverPopup .popup-content {
+  background-color: #111;
+  border: 2px solid #ffcc00;
+  border-radius: 10px;
+  padding: 20px;
+  color: #ffcc00;
+  text-align: center;
+  font-family: "Press Start 2P", cursive;
+  width: 320px;
+}
+
+#gameOverPopup .popup-content {
+  background: #111;
+  color: #FFD700;
+  border: 3px solid #FFD700;
+  text-align: center;
+  padding: 30px 40px;
+  border-radius: 10px;
+  font-family: 'Press Start 2P', cursive;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+}
+
+#gameOverPopup button {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  margin: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: bold;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#gameOverPopup button:hover {
+  background: #ffea00;
+  transform: scale(1.1);
+}
+
+#gameOverPopup {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#gameOverPopup[style*="display: flex"] {
+  opacity: 1;
+}
+
+.side-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* estilo base dos botões laterais */
+.side-buttons button {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+  text-transform: uppercase;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+/* efeito ao passar o mouse */
+.side-buttons button:hover {
+  background: #ffea00;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.8);
+}
+
+/*  Efeito visual do modo insano */
+body.modo-insano {
+  animation: piscarFundo 0.2s infinite alternate;
+}
+
+@keyframes piscarFundo {
+  0% { background-color: #400; }
+  50% { background-color: #800; }
+  100% { background-color: #c00; }
+}
+
+#insanoTimer {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-family: "Press Start 2P", cursive;
+  font-size: 12px;
+  color: #ff4444;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 12px;
+  border: 2px solid #ff0000;
+  border-radius: 6px;
+  text-shadow: 0 0 5px #ff0000;
+  animation: pulsarTexto 0.5s infinite alternate;
+  z-index: 999;
+}
+
+@keyframes pulsarTexto {
+  from { opacity: 0.8; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.05); }
+}
 
