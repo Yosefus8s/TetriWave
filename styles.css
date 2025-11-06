@@ -344,3 +344,135 @@ input {
 #configPopup button:hover {
   background: #ffea00;
 }
+
+/* --- Tela de Pausa --- */
+#pausePopup {
+  display: none;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1200;
+}
+
+#pausePopup .popup-content {
+  background: #111;
+  color: #FFD700;
+  border: 3px solid #FFD700;
+  text-align: center;
+  padding: 30px 40px;
+  border-radius: 10px;
+  font-family: 'Press Start 2P', cursive;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+}
+
+#pausePopup button {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  margin: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: bold;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#pausePopup button:hover {
+  background: #ffea00;
+  transform: scale(1.1);
+}
+
+/* --- Créditos (Configurações e Pausa) --- */
+.credits {
+  margin-top: 20px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  line-height: 1.4;
+  font-family: 'Press Start 2P', cursive;
+}
+
+.credits a {
+  color: #FFD700;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.credits a:hover {
+  text-decoration: underline;
+  color: #ffea00;
+}
+
+.dev-name {
+  color: #FFD700;              /* dourado principal */
+  letter-spacing: 1px;
+  display: inline-block;
+  margin-top: 4px;
+  transition: transform 0.2s ease-in-out, text-shadow 0.3s ease;
+}
+
+/* --- TIMER NO TOPO --- */
+.canvas-container {
+  position: relative;
+  display: inline-block;
+}
+
+#timerDisplay {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.1rem;
+  color: #FFD700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 0 12px rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 5;
+  letter-spacing: 1px;
+}
+
+#recordPopup .popup-content {
+  background: #111;
+  color: #FFD700;
+  border: 3px solid #FFD700;
+  text-align: center;
+  padding: 30px 40px;
+  border-radius: 10px;
+  font-family: 'Press Start 2P', cursive;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+}
+
+#recordPopup input {
+  padding: 10px;
+  width: 200px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 10px;
+  border: 2px solid #FFD700;
+  background: #000;
+  color: #FFD700;
+  border-radius: 6px;
+}
+
+#recordPopup button {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  margin: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: bold;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#recordPopup button:hover {
+  background: #ffea00;
+  transform: scale(1.1);
+}
+
+

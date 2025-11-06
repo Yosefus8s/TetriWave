@@ -4,9 +4,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = canvas.getContext('2d');
     const nextCanvas = document.getElementById('mcan');
     const nextCtx = nextCanvas.getContext('2d');
+    const pausePopup = document.getElementById("pausePopup");
+    const resumeButton = document.getElementById("resumeButton");
+    const restartButton = document.getElementById("restartButton");
+    const exitButton = document.getElementById("exitButton");
+    const recordPopup = document.getElementById("recordPopup");
+    const finalScoreEl = document.getElementById("finalScore");
+    const playerNameInput = document.getElementById("playerName");
+    const saveRecordBtn = document.getElementById("saveRecord");
+    const skipRecordBtn = document.getElementById("skipRecord");
+    const reiniciarButtonPainel = document.querySelector('.coluna1 button:nth-of-type(2)');
+    reiniciarButtonPainel.addEventListener('click', reiniciarJogo);
+
     const ROWS = 20; // linhas horizontal, vigas do jogo
     const COLS = 10; // colunas do jogo
     const BLOCK_SIZE = 30; //tamanho do bloco 30px
+
 
     // Definição das peças do jogo
     const Blocos = [[[1, 1, 1], [1, 0, 0], [1, 0, 0]],//0
@@ -37,6 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let ultimoTempo = 0;
     let velocidade = 1000; // tempo em ms
     let jogoIniciado = false;
+    let tempoInicio = null;
+    let tempoJogado = 0;
+
     const bgMusic = document.getElementById("bgMusic");
     const sndLine = document.getElementById("sndLine");
     const sndLock = document.getElementById("sndLock");
@@ -53,6 +69,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let musicaAtiva = false;
 
+    function atualizarRecordeUI() {
+        let rec = null;
+
+        try {
+            rec = JSON.parse(localStorage.getItem("recorde"));
+        } catch (e) {
+            rec = null;
+        }
+
+        // Se não existir ou estiver malformado, recria com padrão
+        if (!rec || typeof rec.pontuacao !== "number" || typeof rec.nome !== "string") {
+            rec = { nome: "Anônimo", pontuacao: 0 };
+            localStorage.setItem("recorde", JSON.stringify(rec));
+        }
+
+        const elPontuacao = document.getElementById("recorde");
+        const elNome = document.getElementById("recordeNome");
+
+        // se ainda não existir na tela (ex: o jogo ainda está carregando)
+        if (!elPontuacao || !elNome) return;
+
+        elPontuacao.textContent = rec.pontuacao.toString().padStart(6, "0");
+        elNome.textContent = rec.nome;
+    }
+
 
     // Inicialização do jogo
     function inicializar() {
@@ -67,10 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
         proximaPeca = gerarPeca(); //gerador de peça aleatória
         novaPeca(); // coloca  uma nova peça no tabuleiro, move a proximaPeca para ser a pecaAtual, também verifica se já é game over
         atualizarProximaPeca();// mostra a próxima peça, limpa o canvas  e desenha a nova peça no tabuleiro
+
         ultimoTempo = performance.now();
+        tempoInicio = performance.now();
+        tempoJogado = 0;
         requestAnimationFrame(gameLoop);
         adicionarMensagem("Jogo iniciado");
     }
+
 
     // Gera uma peça aleatória
     function gerarPeca() {
@@ -109,6 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (verificarColisao()) { // instrução que retorna true se a peça atual colidir com algo, ela é acionada quando a peça nasce em cia de outro bloco ou ela nasce fora dos limites do tabuleiro
             gameOver = true; // o jogo termina
             adicionarMensagem("Fim de jogo! Sua pontuação: " + pontuacao); // exibe uma mensagem que informa o fim do jogo
+            mostrarTelaRecord(); // ← chama a tela de record
+
         }
     }
 
@@ -138,19 +185,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Loop principal do jogo
-    function gameLoop(timestamp) { //
-        if (!jogoPausado && !gameOver) { // verifica se o jogo não está pausado e não terminou. Só atualiza o jogo se estiver ativo e não pausado
-            const deltaTime = timestamp - ultimoTempo; // Medir o tempo que passou para controlar a velocidade do jogo
+    function gameLoop(timestamp) {
+        if (gameOver) {
+            // 🔹 Quando o jogo termina, pausa a música e interrompe o loop
+            try { bgMusic.pause(); } catch (e) { }
+            adicionarMensagem("Jogo finalizado!");
+            return; // <── Para o loop completamente
+        }
 
-            if (deltaTime > velocidade) { // verifica se passou tempo suficiente desde o último movimento
-                moverPecaParaBaixo(); // move a peça atual para baixo
-                ultimoTempo = timestamp; // atualiza o tempo do último movimento
+        if (!jogoPausado) {
+            const deltaTime = timestamp - ultimoTempo;
+            tempoJogado = timestamp - tempoInicio;
+            atualizarTempo();
+
+            if (deltaTime > velocidade) {
+                moverPecaParaBaixo();
+                ultimoTempo = timestamp;
             }
         }
 
-        desenhar(); // renderiza o jogo na tela
-        requestAnimationFrame(gameLoop); // O requestAnimationFrame é uma API moderna dos navegadores para criar animações suaves e eficientes. cria um loop de animação suave e eficiente
+        desenhar();
+        requestAnimationFrame(gameLoop);
     }
+
+
+    function atualizarTempo() {
+        const totalSegundos = Math.floor(tempoJogado / 1000);
+        const minutos = Math.floor(totalSegundos / 60);
+        const segundos = totalSegundos % 60;
+
+        document.getElementById("timerDisplay").textContent =
+            `⏱ ${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+    }
+
 
     // Desenha o tabuleiro e a peça atual
     function desenhar() {
@@ -428,39 +495,97 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Pausa/continua o jogo
     function togglePause() {
-        jogoPausado = !jogoPausado; // Pausa ou despausa
-        adicionarMensagem(jogoPausado ? "Jogo pausado" : "Jogo continuado");
+        jogoPausado = !jogoPausado;
+
         if (jogoPausado) {
+            pausePopup.style.display = "flex";
             bgMusic.pause();
+            adicionarMensagem("Jogo pausado");
         } else {
+            pausePopup.style.display = "none";
             bgMusic.play();
+            adicionarMensagem("Jogo continuado");
         }
     }
 
+    // Botões da tela de pausa
+    resumeButton.addEventListener("click", () => {
+        togglePause();
+    });
+
+    restartButton.addEventListener("click", () => {
+        pausePopup.style.display = "none";
+        reiniciarJogo();
+    });
+
+    exitButton.addEventListener("click", () => {
+        pausePopup.style.display = "none";
+        jogoPausado = true;
+        adicionarMensagem("Saindo para menu...");
+        // Aqui você pode voltar para o popup inicial:
+        document.getElementById("popup").style.display = "flex";
+        jogoIniciado = false;
+    });
+
     // Reinicia o jogo
     function reiniciarJogo() {
-        tabuleiro = Array.from({ length: ROWS }, () => Array(COLS).fill(0));// Reseta o tabuleiro para vazio
-        // Reseta todas as variáveis de estado
+        // Fecha popups
+        try { recordPopup.style.display = "none"; } catch (e) { }
+        try { pausePopup.style.display = "none"; } catch (e) { }
+        try { document.getElementById("popup").style.display = "none"; } catch (e) { }
+
+        // Limpa canvases
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+        // Reseta o tabuleiro e variáveis
+        tabuleiro = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
         pontuacao = 0;
         nivel = 0;
         linhasCompletas = 0;
         jogoPausado = false;
         gameOver = false;
+        jogoIniciado = true;
 
-        //Reseta a interface
+        // Reset peça atual e próxima peça
+        pecaAtual = null;
+        proximaPeca = gerarPeca();
+
+        // Reinicia timers
+        tempoInicio = performance.now();
+        tempoJogado = 0;
+        document.getElementById("timerDisplay").textContent = "⏱ 00:00";
+
+        // Atualiza UI
         document.getElementById('score').textContent = '000000';
         document.getElementById('level').textContent = '0';
         document.getElementById('lines').textContent = '0';
-        // Limpa o terminal
         document.getElementById('out1').innerHTML = '';
 
-        // Prepara a primeira peça
+        // 🔹 Garante que o jogo tenha uma peça visível
         proximaPeca = gerarPeca();
-        novaPeca();
-        atualizarProximaPeca();
+        novaPeca(); // <── ESSA LINHA FALTAVA!
 
-        adicionarMensagem("Jogo reiniciado!"); // adciona mensagem ao terminal
+        // Atualiza visual da próxima peça e recorde
+        atualizarProximaPeca();
+        atualizarRecordeUI();
+
+        // Desenha frame inicial
+        desenhar();
+
+        // Reinicia loop e música
+        ultimoTempo = performance.now();
+        requestAnimationFrame(gameLoop);
+
+        try {
+            bgMusic.currentTime = 0;
+            bgMusic.play();
+        } catch (e) { }
+
+        adicionarMensagem("Jogo reiniciado!");
     }
+
+
 
     // Adiciona mensagem ao terminal
     function adicionarMensagem(mensagem) {
@@ -473,16 +598,72 @@ document.addEventListener("DOMContentLoaded", () => {
         terminal.innerHTML = `[${hora}:${minuto}:${segundo}] ${mensagem}<br>` + terminal.innerHTML; // exibição da hora mais a mensagem no terminal, usado uma forma diferente de concatenação
     }
 
-    // Função para enviar mensagem do input
-    function enviar() {
-        const input = document.getElementById('in01');
-        const mensagem = input.value.trim(); // remove espaços em branco
+    function mostrarTelaRecord() {
+        console.log("mostrarTelaRecord() chamada");
 
-        if (mensagem) {
-            adicionarMensagem("Jogador: " + mensagem);
-            input.value = ''; // Limpa o input
+        let recordeAtual;
+        try {
+            recordeAtual = JSON.parse(localStorage.getItem("recorde"));
+        } catch {
+            recordeAtual = { nome: "Anônimo", pontuacao: 0 };
         }
+
+        if (!recordeAtual || typeof recordeAtual.pontuacao !== "number") {
+            recordeAtual = { nome: "Anônimo", pontuacao: 0 };
+        }
+
+        finalScoreEl.textContent = pontuacao;
+
+        if (pontuacao > recordeAtual.pontuacao) {
+            adicionarMensagem("🎉 Novo recorde!");
+        } else {
+            adicionarMensagem(
+                `Você fez ${pontuacao} pontos. Record atual: ${recordeAtual.pontuacao} (${recordeAtual.nome})`
+            );
+        }
+
+        // 🔹 Sempre exibe o popup (com ou sem novo recorde)
+        recordPopup.style.display = "flex";
+
+        // 🔹 Pausa o som de fundo
+        try { bgMusic.pause(); } catch (e) { }
     }
+
+
+
+    saveRecordBtn.addEventListener("click", () => {
+        const nome = playerNameInput.value.trim() || "Anônimo";
+        const novoRecorde = { nome, pontuacao };
+        localStorage.setItem("recorde", JSON.stringify(novoRecorde));
+        recordPopup.style.display = "none";
+        adicionarMensagem(`Recorde salvo! ${nome} - ${pontuacao}`);
+        atualizarRecordeUI();
+    });
+
+    skipRecordBtn.addEventListener("click", () => {
+        recordPopup.style.display = "none";
+        adicionarMensagem("Recorde ignorado");
+    });
+
+    const restartAfterRecordBtn = document.getElementById("restartAfterRecord");
+    if (restartAfterRecordBtn) {
+        restartAfterRecordBtn.addEventListener("click", () => {
+            console.log("restartAfterRecord clicado");
+
+            // Fecha o popup
+            recordPopup.style.display = "none";
+
+            // Limpa canvases (extra)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+            // Garante reinício limpo
+            reiniciarJogo();
+        });
+    } else {
+        console.warn("Botão restartAfterRecord não encontrado no DOM.");
+    }
+
     // Mostra o popup inicial quando a página carrega
     const popup = document.getElementById("popup");
     const startButton = document.getElementById("startButton");
@@ -552,6 +733,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillText("PRESSIONE ENTER", canvas.width / 2, canvas.height / 2 - 10);
         ctx.fillText("PARA INICIAR", canvas.width / 2, canvas.height / 2 + 20);
     }
+    atualizarRecordeUI();
 
     desenharMensagemInicial();
 });

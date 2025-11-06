@@ -2,99 +2,148 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TetriWave</title> <!-- Título da aba do navegador -->
-  <link rel="stylesheet" href="styles.css" /><!-- referencia o arquivo .css-->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <script defer src="script.js"></script> <!-- referencia o arquivo .js-->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TetriWave</title> <!-- Título da aba do navegador -->
+    <link rel="stylesheet" href="styles.css" /><!-- referencia o arquivo .css-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script defer src="script.js"></script> <!-- referencia o arquivo .js-->
 </head>
 
 <body>
-  <h1 id="t">TetriWave </h1> <!-- Título principal da página-->
-  <div class="container"> <!-- Div principal que contém todo o layout -->
-    <div class="coluna1"><!-- Primeira coluna da página-->
-      <div class="info-box"><!-- Caixa de informações para exibir o nível -->
-        <p class="text-style">LEVEL</p>
-        <p id="level" class="text-style effect-box">0</p><!-- nível atual -->
-      </div>
-      <div class="info-box"><!-- Caixa de informações para exibir as linhas -->
-        <p class="text-style">LINES</p>
-        <p id="lines" class="text-style effect-box">0</p> <!-- número de linhas atuais -->
-      </div>
-      <div class="info-box"><!-- Caixa de informações para exibir o score -->
-        <p class="text-style">SCORE</p>
-        <p id="score" class="text-style effect-box">000000</p><!-- mostra a pontuação -->
-      </div>
+    <h1 id="t">TetriWave </h1> <!-- Título principal da página-->
+    <div class="container"> <!-- Div principal que contém todo o layout -->
+        <div class="coluna1"><!-- Primeira coluna da página-->
+            <div class="info-box"><!-- Caixa de informações para exibir o nível -->
+                <p class="text-style">LEVEL</p>
+                <p id="level" class="text-style effect-box">0</p><!-- nível atual -->
+            </div>
+            <div class="info-box"><!-- Caixa de informações para exibir as linhas -->
+                <p class="text-style">LINES</p>
+                <p id="lines" class="text-style effect-box">0</p> <!-- número de linhas atuais -->
+            </div>
+            <div class="info-box"><!-- Caixa de informações para exibir o score -->
+                <p class="text-style">SCORE</p>
+                <p id="score" class="text-style effect-box">000000</p><!-- mostra a pontuação -->
+            </div>
+            <div class="info-box">
+                <p class="text-style">RECORD</p>
+                <p id="recorde" class="text-style effect-box">000000</p>
+                <p id="recordeNome" class="text-style small-text">Anônimo</p>
+            </div>
+            <button>Pausar/Continuar</button> <!-- Botão que pausa/continua o jogo -->
+            <button>Reiniciar</button><!-- Botão que reinicia o jogo -->
+        </div>
 
-      <div class="controles"><!-- Lista de instruções de controle para o jogador -->
-        <p>← → : Mover</p>
-        <p>↑ : Girar</p>
-        <p>↓ : Descer</p>
-        <p>Espaço: Cair</p>
-        <p>P: Pausar</p>
-      </div>
+        <div class="coluna2"><!-- Segunda coluna (área principal do jogo) -->
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="300" height="600"></canvas>
+                <div id="timerDisplay">⏱ 00:00</div>
+            </div>
+        </div>
 
-      <button onclick="togglePause()">Pausar/Continuar</button> <!-- Botão que pausa/continua o jogo -->
-      <button onclick="reiniciarJogo()">Reiniciar</button><!-- Botão que reinicia o jogo -->
+        <div class="coluna3"><!-- Terceira coluna (próxima peça e saída do "terminal") -->
+            <p class="text-style">NEXT</p>
+            <canvas id="mcan" width="150" height="150"></canvas><!-- Canvas menor onde será exibida a próxima peça -->
+            <p class="text-style">TERMINAL</p>
+            <p id="out1" class="caixa-texto"></p>
+            <!-- Parágrafo usado como caixa de texto, onde mensagens aparecerão as mensagens -->
+        </div>
     </div>
 
-    <div class="coluna2"><!-- Segunda coluna (área principal do jogo) -->
-      <canvas id="gameCanvas" width="300"
-        height="600"></canvas><!-- onde o jogo será desenhado, com 300px de largura e 600px de altura -->
+    <audio id="bgMusic" src="audio/theme.mp3" loop preload="auto"></audio>
+    <audio id="sndLine" src="audio/line.mp3" preload="auto"></audio>
+    <audio id="sndLock" src="audio/lock.mp3" preload="auto"></audio>
+    <audio id="sndMove" src="audio/move.mp3" preload="auto"></audio>
+    <audio id="sndRotate" src="audio/rotate.mp3" preload="auto"></audio>
+    <audio id="sndDrop" src="audio/drop.mp3" preload="auto"></audio>
+
+    <!-- Tela de Configurações -->
+    <div id="configPopup" class="popup">
+        <div class="popup-content">
+            <h2>Configurações de Som</h2>
+
+            <label for="volumeRange">Volume:</label>
+            <input type="range" id="volumeRange" min="0" max="1" step="0.05" value="0.5">
+
+            <div style="margin-top: 15px;">
+                <button id="muteButton">🔇 Som Desligado</button>
+                <button id="closeConfig">Fechar</button>
+            </div>
+            <p class="credits">
+                Desenvolvido por:<br>
+                <span class="dev-name">Ana</span><br>
+                <a href="https://github.com/ana" target="_blank">github.com/ana</a><br>
+                <span class="dev-name">Bruno</span><br>
+                <a href="https://github.com/bruno" target="_blank">github.com/bruno</a><br>
+                <span class="dev-name">Carlos</span><br>
+                <a href="https://github.com/carlos" target="_blank">github.com/carlos</a><br>
+                <span class="dev-name">Daniela</span><br>
+                <a href="https://github.com/daniela" target="_blank">github.com/daniela</a>
+            </p>
+
+        </div>
     </div>
 
-    <div class="coluna3"><!-- Terceira coluna (próxima peça e saída do "terminal") -->
-      <p class="text-style">NEXT</p>
-      <canvas id="mcan" width="150" height="150"></canvas><!-- Canvas menor onde será exibida a próxima peça -->
-      <p class="text-style">TERMINAL</p>
-      <p id="out1" class="caixa-texto"></p>
-      <!-- Parágrafo usado como caixa de texto, onde mensagens aparecerão as mensagens -->
+    <!-- Tela de Pausa -->
+    <div id="pausePopup" class="popup">
+        <div class="popup-content">
+            <h2>⏸️ Jogo Pausado</h2>
+            <p>Pressione <b>P</b> para continuar</p>
+            <div style="margin-top: 15px;">
+                <button id="resumeButton">Continuar</button>
+                <button id="restartButton">Reiniciar</button>
+                <button id="exitButton">Sair</button>
+            </div>
+            <p class="credits">
+                Desenvolvido por:<br>
+                <span class="dev-name">Eduardo Pereira</span><br>
+                <a href="https://github.com/edududu205" target="_blank">github.com/edududu205</a><br>
+                <span class="dev-name">Eduardo Reis</span><br>
+                <a href="https://github.com/bruno" target="_blank">github.com/bruno</a><br>
+                <span class="dev-name">José Otávio Borges</span><br>
+                <a href="https://github.com/Yosefus8s/TetriWave" target="_blank">github.com/Yosefus8s</a><br>
+                <span class="dev-name">Pabblo</span><br>
+                <a href="https://github.com/daniela" target="_blank">github.com/daniela</a>
+            </p>
+        </div>
     </div>
-  </div>
-
-  <audio id="bgMusic" src="audio/theme.mp3" loop preload="auto"></audio>
-  <audio id="sndLine" src="audio/line.mp3" preload="auto"></audio>
-  <audio id="sndLock" src="audio/lock.mp3" preload="auto"></audio>
-  <audio id="sndMove" src="audio/move.mp3" preload="auto"></audio>
-  <audio id="sndRotate" src="audio/rotate.mp3" preload="auto"></audio>
-  <audio id="sndDrop" src="audio/drop.mp3" preload="auto"></audio>
-  
-  <!-- Tela de Configurações -->
-<div id="configPopup" class="popup">
-  <div class="popup-content">
-    <h2>Configurações de Som</h2>
-
-    <label for="volumeRange">Volume:</label>
-    <input type="range" id="volumeRange" min="0" max="1" step="0.05" value="0.5">
-
-    <div style="margin-top: 15px;">
-      <button id="muteButton">🔇 Som Desligado</button>
-      <button id="closeConfig">Fechar</button>
-    </div>
-  </div>
+    <!-- Tela de Record -->
+    <div id="recordPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h2> Novo Recorde!</h2>
+            <p>Sua pontuação: <span id="finalScore"></span></p>
+            <label for="playerName">Digite seu nome:</label>
+            <input type="text" id="playerName" maxlength="10" placeholder="Seu nome">
+            <div style="margin-top: 15px;">
+  <button id="saveRecord">Salvar</button>
+  <button id="skipRecord">Pular</button>
+  <button id="restartAfterRecord">🔁 Jogar Novamente</button>
 </div>
 
-<!-- Botão para abrir Configurações -->
-<button id="configButton" class="config-btn">
-  <img src="img/settings-gear.png" alt="Configurações" class="icon-btn"> 
-</button>
-  <div id="popup" class="popup">
-    <div class="popup-content">
-      <h2>Bem-vindo ao TetriWave!</h2>
-      <p>Controles:</p>
-      <ul>
-        <li>← → : mover</li>
-        <li>↑ : girar</li>
-        <li>↓ : descer</li>
-        <li>Espaço: cair</li>
-        <li>P: pausar</li>
-      </ul>
-      <button id="startButton">Iniciar Jogo</button>
+        </div>
     </div>
-  </div>
+
+    <!-- Botão para abrir Configurações -->
+    <button id="configButton" class="config-btn">
+        <img src="img/settings-gear.png" alt="Configurações" class="icon-btn">
+    </button>
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <h2>Bem-vindo ao TetriWave!</h2>
+            <p>Controles:</p>
+            <ul>
+                <li>← → : mover</li>
+                <li>↑ : girar</li>
+                <li>↓ : descer</li>
+                <li>Espaço: cair</li>
+                <li>P: pausar</li>
+            </ul>
+            <button id="startButton">Iniciar Jogo</button>
+        </div>
+    </div>
 </body>
 
 </html>
