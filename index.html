@@ -33,14 +33,18 @@
                 <p id="recorde" class="text-style effect-box">000000</p>
                 <p id="recordeNome" class="text-style small-text">Anônimo</p>
             </div>
-            <button>Pausar/Continuar</button> <!-- Botão que pausa/continua o jogo -->
-            <button>Reiniciar</button><!-- Botão que reinicia o jogo -->
+            <div class="side-buttons">
+                <button id="pausePanelBtn">⏸️ Pausar / ▶️ Continuar</button>
+                <button id="restartPanelBtn">🔁 Reiniciar</button>
+            </div>
         </div>
 
         <div class="coluna2"><!-- Segunda coluna (área principal do jogo) -->
             <div class="canvas-container">
                 <canvas id="gameCanvas" width="300" height="600"></canvas>
                 <div id="timerDisplay">⏱ 00:00</div>
+                <!-- Indicador do Modo Insano -->
+                <div id="insanoTimer" style="display: none;">INSANO: 60s</div>
             </div>
         </div>
 
@@ -59,6 +63,7 @@
     <audio id="sndMove" src="audio/move.mp3" preload="auto"></audio>
     <audio id="sndRotate" src="audio/rotate.mp3" preload="auto"></audio>
     <audio id="sndDrop" src="audio/drop.mp3" preload="auto"></audio>
+    <audio id="aviaoSom" src="audio/aviao-som.mp3" preload="auto"></audio>
 
     <!-- Tela de Configurações -->
     <div id="configPopup" class="popup">
@@ -74,14 +79,12 @@
             </div>
             <p class="credits">
                 Desenvolvido por:<br>
-                <span class="dev-name">Ana</span><br>
-                <a href="https://github.com/ana" target="_blank">github.com/ana</a><br>
-                <span class="dev-name">Bruno</span><br>
+                <span class="dev-name">Eduardo Pereira</span><br>
+                <a href="https://github.com/edududu205" target="_blank">github.com/edududu205</a><br>
+                <span class="dev-name">Eduardo Reis</span><br>
                 <a href="https://github.com/bruno" target="_blank">github.com/bruno</a><br>
-                <span class="dev-name">Carlos</span><br>
-                <a href="https://github.com/carlos" target="_blank">github.com/carlos</a><br>
-                <span class="dev-name">Daniela</span><br>
-                <a href="https://github.com/daniela" target="_blank">github.com/daniela</a>
+                <span class="dev-name">José Otávio Borges</span><br>
+                <a href="https://github.com/Yosefus8s/TetriWave" target="_blank">github.com/Yosefus8s</a><br>
             </p>
 
         </div>
@@ -105,8 +108,7 @@
                 <a href="https://github.com/bruno" target="_blank">github.com/bruno</a><br>
                 <span class="dev-name">José Otávio Borges</span><br>
                 <a href="https://github.com/Yosefus8s/TetriWave" target="_blank">github.com/Yosefus8s</a><br>
-                <span class="dev-name">Pabblo</span><br>
-                <a href="https://github.com/daniela" target="_blank">github.com/daniela</a>
+
             </p>
         </div>
     </div>
@@ -118,11 +120,23 @@
             <label for="playerName">Digite seu nome:</label>
             <input type="text" id="playerName" maxlength="10" placeholder="Seu nome">
             <div style="margin-top: 15px;">
-  <button id="saveRecord">Salvar</button>
-  <button id="skipRecord">Pular</button>
-  <button id="restartAfterRecord">🔁 Jogar Novamente</button>
-</div>
+                <button id="saveRecord">Salvar</button>
+                <button id="skipRecord">Pular</button>
+                <button id="restartAfterRecord">🔁 Jogar Novamente</button>
+            </div>
 
+        </div>
+    </div>
+
+    <!-- Tela para FIM DE JOGO (sem novo recorde) -->
+    <div id="gameOverPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h2>Fim de Jogo!</h2>
+            <p>Sua pontuação: <span id="finalScoreGameOver">0</span></p>
+            <div style="margin-top: 15px;">
+                <button id="restartGameOver">Jogar Novamente</button>
+                <button id="exitGameOver">Sair</button>
+            </div>
         </div>
     </div>
 
